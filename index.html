@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Flappy Bird Pro</title>
+<title>Flappy Bird for Nishanvi 💖</title>
 
 <style>
 html,body{
@@ -27,7 +27,7 @@ canvas{
   position:absolute;
   top:12px;
   left:12px;
-  background:rgba(255,255,255,.8);
+  background:rgba(255,255,255,.85);
   padding:8px 12px;
   border-radius:8px;
   font-weight:700;
@@ -40,6 +40,9 @@ canvas{
   text-align:center;
   color:white;
 }
+.centerText h2{
+  margin-bottom:6px;
+}
 #mobileBtns{
   position:absolute;
   bottom:20px;
@@ -51,7 +54,7 @@ canvas{
   padding:22px;
   border-radius:50%;
   font-size:24px;
-  background:#1a8cff;
+  background:#ff4d6d;
   color:white;
   border:none;
 }
@@ -69,10 +72,13 @@ button{
 <div id="gameWrap">
   <canvas id="game" width="400" height="600"></canvas>
   <div class="overlay" id="scoreBox">Score: 0 | Best: 0</div>
+
   <div class="centerText" id="centerUI">
+    <h2>Flappy Bird for Nishanvi 💖</h2>
     <button id="startBtn">Start Game</button>
     <p>Press SPACE or Tap</p>
   </div>
+
   <div id="mobileBtns">
     <button id="jumpBtn">⬆</button>
   </div>
@@ -80,86 +86,92 @@ button{
 
 <script>
 // IMAGES
-const bgImg = new Image(); bgImg.src="https://i.ibb.co/LdM8P7zR/download-1.jpg";
-const birdImg = new Image(); birdImg.src="https://i.ibb.co/3y35STBv/Whats-App-Image-2025-12-07-at-9-20-28-PM.jpg";
-const pipeTop1 = new Image(); pipeTop1.src="https://i.ibb.co/GfBK81rp/Screenshot-2025-12-07-at-9-46-13-PM.png";
-const pipeTop2 = new Image(); pipeTop2.src="https://i.ibb.co/XfSG63rj/Screenshot-2025-12-07-at-9-46-05-PM.png";
-const pipeBottom1 = new Image(); pipeBottom1.src="https://i.ibb.co/W4WRGbp3/Screenshot-2025-12-07-at-9-48-18-PM.png";
-const pipeBottom2 = new Image(); pipeBottom2.src="https://i.ibb.co/8nSZm9yg/Screenshot-2025-12-07-at-9-48-09-PM.png";
+const bgImg = new Image();
+bgImg.src = "https://i.ibb.co/LdM8P7zR/download-1.jpg";
+
+const birdImg = new Image();
+birdImg.src = "https://i.ibb.co/q3hRnjrT/nishnavi2.jpg";
+
+const pipeTop = new Image();
+pipeTop.src = "https://i.ibb.co/GfBK81rp/Screenshot-2025-12-07-at-9-46-13-PM.png";
+
+const pipeBottom = new Image();
+pipeBottom.src = "https://i.ibb.co/W4WRGbp3/Screenshot-2025-12-07-at-9-48-18-PM.png";
 
 // SOUND
 const flapSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-player-jumping-in-a-video-game-2043.mp3");
 const hitSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-explosion-2759.mp3");
 
 // CANVAS
-const canvas=document.getElementById("game");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
 
 // UI
-const scoreBox=document.getElementById("scoreBox");
-const centerUI=document.getElementById("centerUI");
-const mobileBtns=document.getElementById("mobileBtns");
-const jumpBtn=document.getElementById("jumpBtn");
+const scoreBox = document.getElementById("scoreBox");
+const centerUI = document.getElementById("centerUI");
+const mobileBtns = document.getElementById("mobileBtns");
+const jumpBtn = document.getElementById("jumpBtn");
 
 // GAME STATE
-let bird=null, pipes=[], score=0, bestScore=0;
-let frame=0, gameOver=true;
+let bird, pipes, score, bestScore = 0;
+let frame = 0, gameOver = true;
 
-const gravity=0.45;
-const flapStrength=-8;
-const baseSpeed=3;
+// CONSTANTS
+const gravity = 0.45;
+const flapStrength = -8;
+const baseSpeed = 3;
 
-// RESET
+// RESET GAME
 function resetGame(){
-  bird={x:80,y:300,vy:0,angle:0,r:18};
-  pipes=[];
-  score=0;
-  frame=0;
-  gameOver=false;
-  scoreBox.textContent=`Score: 0 | Best: ${bestScore}`;
+  bird = { x:80, y:300, vy:0, r:22, angle:0 };
+  pipes = [];
+  score = 0;
+  frame = 0;
+  gameOver = false;
+  scoreBox.textContent = `Score: 0 | Best: ${bestScore}`;
 }
 
-// PIPES
+// SPAWN PIPE
 function spawnPipe(){
-  const gap=Math.max(120,180-score*2);
-  const top=Math.random()*250+40;
+  const gap = 160;
+  const top = Math.random()*250 + 40;
   pipes.push({
     x:420,
     w:70,
     top,
-    bottom:top+gap,
-    topImg:Math.random()>0.5?pipeTop1:pipeTop2,
-    bottomImg:Math.random()>0.5?pipeBottom1:pipeBottom2,
+    bottom: top + gap,
     passed:false
   });
 }
+
 // UPDATE
 function update(){
   frame++;
-  bird.vy+=gravity;
-  bird.y+=bird.vy;
-  bird.angle=Math.min(1,bird.vy/10);
+  bird.vy += gravity;
+  bird.y += bird.vy;
+  bird.angle = Math.min(0.8, bird.vy/10);
 
-  const speed=baseSpeed+score*0.05;
+  const speed = baseSpeed + score*0.05;
 
   pipes.forEach(p=>{
-    p.x-=speed;
-    if(!p.passed && p.x+p.w<bird.x){
-      p.passed=true;
+    p.x -= speed;
+    if(!p.passed && p.x + p.w < bird.x){
+      p.passed = true;
       score++;
-      scoreBox.textContent=`Score: ${score} | Best: ${bestScore}`;
+      scoreBox.textContent = `Score: ${score} | Best: ${bestScore}`;
     }
   });
 
-  pipes=pipes.filter(p=>p.x+p.w>-50);
-  if(frame%110===0) spawnPipe();
+  pipes = pipes.filter(p=>p.x + p.w > -50);
+  if(frame % 110 === 0) spawnPipe();
 
-  if(bird.y+bird.r>=600) endGame();
-  if(bird.y-bird.r<=0){bird.y=bird.r; bird.vy=0;}
+  if(bird.y + bird.r >= 600 || bird.y - bird.r <= 0) endGame();
 
   for(const p of pipes){
-    const hitX=bird.x+bird.r>p.x && bird.x-bird.r<p.x+p.w;
-    if(hitX && (bird.y-bird.r<p.top || bird.y+bird.r>p.bottom)) endGame();
+    const hitX = bird.x + bird.r > p.x && bird.x - bird.r < p.x + p.w;
+    if(hitX && (bird.y - bird.r < p.top || bird.y + bird.r > p.bottom)){
+      endGame();
+    }
   }
 }
 
@@ -169,15 +181,15 @@ function draw(){
   ctx.drawImage(bgImg,0,0,400,600);
 
   pipes.forEach(p=>{
-    ctx.drawImage(p.topImg,p.x,p.top-350,p.w,350);
-    ctx.drawImage(p.bottomImg,p.x,p.bottom,p.w,350);
+    ctx.drawImage(pipeTop, p.x, p.top - 350, p.w, 350);
+    ctx.drawImage(pipeBottom, p.x, p.bottom, p.w, 350);
   });
 
   if(bird){
     ctx.save();
-    ctx.translate(bird.x,bird.y);
+    ctx.translate(bird.x, bird.y);
     ctx.rotate(bird.angle);
-    ctx.drawImage(birdImg,-20,-20,40,40);
+    ctx.drawImage(birdImg, -22, -22, 44, 44);
     ctx.restore();
   }
 }
@@ -192,19 +204,19 @@ function loop(){
 // ACTIONS
 function flap(){
   if(!gameOver){
-    bird.vy=flapStrength;
-    try{flapSound.play();}catch{}
+    bird.vy = flapStrength;
+    flapSound.play().catch(()=>{});
   }
 }
 
 function endGame(){
   if(gameOver) return;
-  gameOver=true;
-  try{hitSound.play();}catch{}
-  bestScore=Math.max(bestScore,score);
-  centerUI.style.display="block";
-  centerUI.innerHTML=`
-    <h2>Game Over</h2>
+  gameOver = true;
+  hitSound.play().catch(()=>{});
+  bestScore = Math.max(bestScore, score);
+  centerUI.style.display = "block";
+  centerUI.innerHTML = `
+    <h2>Game Over 💔</h2>
     <p>Score: ${score}<br>Best: ${bestScore}</p>
     <button onclick="startGame()">Restart</button>
     <p>Press SPACE</p>
@@ -214,24 +226,26 @@ function endGame(){
 // START
 function startGame(){
   resetGame();
-  centerUI.style.display="none";
-  mobileBtns.style.display="flex";
+  centerUI.style.display = "none";
+  mobileBtns.style.display = "flex";
 }
 
 // INPUT
-window.onkeydown=e=>{
-  if(e.code==="Space"){
+window.onkeydown = e => {
+  if(e.code === "Space"){
     if(gameOver) startGame();
     else flap();
   }
 };
-canvas.onmousedown=flap;
-canvas.ontouchstart=e=>{e.preventDefault(); flap();}
-jumpBtn.onclick=flap;
-document.getElementById("startBtn").onclick=startGame;
+canvas.onmousedown = flap;
+canvas.ontouchstart = e => { e.preventDefault(); flap(); };
+jumpBtn.onclick = flap;
+document.getElementById("startBtn").onclick = startGame;
 
+// RUN
 loop();
 </script>
 </body>
 </html>
+
 
