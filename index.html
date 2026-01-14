@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Flappy Bird for Nishanvi 💖</title>
+<title>For Nishanvi 💖</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
@@ -16,7 +16,7 @@ body{
   font-family:Arial, sans-serif;
 }
 canvas{
-  background:#70c5ce;
+  background:linear-gradient(#70c5ce,#bde7ff);
   border-radius:14px;
 }
 #msg{
@@ -24,15 +24,24 @@ canvas{
   color:white;
   text-align:center;
 }
+#score{
+  position:absolute;
+  top:15px;
+  color:white;
+  font-size:20px;
+  font-weight:bold;
+}
 </style>
 </head>
 
 <body>
 
 <div id="msg">
-  <h2>Flappy Bird for Nishanvi 💖</h2>
-  <p>Click / Tap / Space to Start</p>
+  <h2>Flappy Love for Nishanvi 💖</h2>
+  <p>Tap / Click / Space to Start</p>
 </div>
+
+<div id="score">❤️ 0</div>
 
 <canvas id="game" width="360" height="540"></canvas>
 
@@ -40,63 +49,69 @@ canvas{
 const canvas = document.getElementById("game");
 const ctx = canvas.getContext("2d");
 const msg = document.getElementById("msg");
+const scoreBox = document.getElementById("score");
 
-// IMAGES
+// BIRD IMAGE
 const birdImg = new Image();
 birdImg.src = "https://i.ibb.co/q3hRnjrT/nishnavi2.jpg";
 
-const pipeColor = "#2ecc71";
-
 // GAME STATE
-let bird, pipes, score, started=false, gameOver=false;
+let bird, hearts, score;
+let started = false;
 
 // CONSTANTS
-const gravity = 0.5;
+const gravity = 0.45;
 const jump = -8;
-const pipeGap = 140;
-const pipeWidth = 60;
 
 // INIT
 function init(){
   bird = { x:80, y:270, v:0, r:20 };
-  pipes = [];
+  hearts = [];
   score = 0;
-  gameOver = false;
+  scoreBox.innerText = "❤️ 0";
 }
 
 // INPUT
 function flap(){
   if(!started){
-    started=true;
-    msg.style.display="none";
+    started = true;
+    msg.style.display = "none";
     init();
   }
-  if(!gameOver){
-    bird.v = jump;
-  }else{
-    started=false;
-    msg.innerHTML="<h2>Game Over 💔</h2><p>Tap to Restart</p>";
-    msg.style.display="block";
-  }
+  bird.v = jump;
 }
 
-document.addEventListener("click",flap);
-document.addEventListener("keydown",e=>{
-  if(e.code==="Space") flap();
+document.addEventListener("click", flap);
+document.addEventListener("keydown", e=>{
+  if(e.code === "Space") flap();
 });
 
-// SPAWN PIPE
-function addPipe(){
-  const top = Math.random()*200+40;
-  pipes.push({ x:canvas.width, top });
+// CREATE HEART
+function addHeart(){
+  hearts.push({
+    x: canvas.width + 20,
+    y: Math.random() * 360 + 80,
+    size: 18,
+    hit: false
+  });
+}
+
+// DRAW HEART
+function drawHeart(x,y,size){
+  ctx.fillStyle = "#ff4d6d";
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  ctx.bezierCurveTo(x-size, y-size, x-size*1.5, y+size/2, x, y+size);
+  ctx.bezierCurveTo(x+size*1.5, y+size/2, x+size, y-size, x, y);
+  ctx.fill();
 }
 
 // LOOP
 function loop(){
   ctx.clearRect(0,0,canvas.width,canvas.height);
 
-  // DRAW BIRD
   if(started){
+    // BIRD
     bird.v += gravity;
     bird.y += bird.v;
 
@@ -107,28 +122,31 @@ function loop(){
     ctx.drawImage(birdImg,bird.x-bird.r,bird.y-bird.r,bird.r*2,bird.r*2);
     ctx.restore();
 
-    if(bird.y+bird.r>canvas.height || bird.y-bird.r<0){
-      gameOver=true;
+    // SCREEN LIMIT
+    if(bird.y + bird.r > canvas.height || bird.y - bird.r < 0){
+      started = false;
+      msg.innerHTML = "<h2>Game Over 💔</h2><p>Tap to Restart</p>";
+      msg.style.display = "block";
     }
 
-    // PIPES
-    if(Math.random()<0.02) addPipe();
+    // HEART SPAWN
+    if(Math.random() < 0.02) addHeart();
 
-    pipes.forEach(p=>{
-      p.x -= 2;
+    hearts.forEach(h=>{
+      h.x -= 2.5;
+      drawHeart(h.x,h.y,h.size);
 
-      ctx.fillStyle=pipeColor;
-      ctx.fillRect(p.x,0,pipeWidth,p.top);
-      ctx.fillRect(p.x,p.top+pipeGap,pipeWidth,canvas.height);
-
-      if(
-        bird.x+bird.r>p.x &&
-        bird.x-bird.r<p.x+pipeWidth &&
-        (bird.y-bird.r<p.top || bird.y+bird.r>p.top+pipeGap)
-      ){
-        gameOver=true;
+      // COLLISION
+      const dx = bird.x - h.x;
+      const dy = bird.y - h.y;
+      if(!h.hit && Math.sqrt(dx*dx + dy*dy) < bird.r + h.size){
+        h.hit = true;
+        score++;
+        scoreBox.innerText = "❤️ " + score;
       }
     });
+
+    hearts = hearts.filter(h => h.x > -30 && !h.hit);
   }
 
   requestAnimationFrame(loop);
@@ -139,5 +157,3 @@ loop();
 
 </body>
 </html>
-
-
